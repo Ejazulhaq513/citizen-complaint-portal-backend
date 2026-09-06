@@ -7,12 +7,22 @@ const complaintRoutes = require("./routers/complaintRoutes.js"); // 1. Router im
 // 2. PEHLE app ko initialize karein
 const app = express();
 
-// Database connect karein
-connectDB();
-
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Ensure MongoDB is connected before handling API requests
+app.use(async (req, res, next) => {
+    if (req.path === "/") {
+        return next();
+    }
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        res.status(500).json({ error: "Database connection failed: " + err.message });
+    }
+});
 
 // Routes
 app.get("/", (req, res) => {
